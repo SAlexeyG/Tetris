@@ -1,24 +1,49 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Tetromino
 {
 	private Transform transform;
-	private TetrominoItem[] tetrominoItems;
 	private IInput inputManager;
+	private TetrisBlock tetrisBlock;
 
-	Tetromino(Transform _transform, IInput _input, TetrominoVariant variant)
+	public Transform Transform { get => transform; }
+
+	public Tetromino(Transform _transform, IInput _input, TetrisBlock _tetrisBlock)
 	{
 		transform = _transform;
 		inputManager = _input;
-		tetrominoItems = new TetrominoItem[variant.tetrominoItemPositions.Length];
+		tetrisBlock = _tetrisBlock;
 
-		for(int i = 0; i < tetrominoItems.Length; i++)
+		inputManager.OnLeft += () => Move(Vector3.left);
+		inputManager.OnRight += () => Move(Vector3.right);
+		inputManager.OnUp += Rotate;
+		inputManager.OnDown += Fall;
+	}
+
+	private void Rotate()
+	{
+		transform.Rotate(Vector3.forward, -90f);
+		if (!tetrisBlock.ValidateMove(this))
+			transform.Rotate(Vector3.forward, 90f);
+	}
+
+	private void Fall()
+	{
+		transform.position += Vector3.down;
+		if (!tetrisBlock.ValidateMove(this))
 		{
-			tetrominoItems[i] = new TetrominoItem();
-			tetrominoItems[i].spriteRenderer.sprite = variant.sprite;
-			tetrominoItems[i].transform = new Transform();
+			transform.position += Vector3.up;
+			tetrisBlock.DestructTetromino(this);
 		}
+	}
+
+	private void Move(Vector3 direction)
+	{
+		transform.position += direction;
+		if (!tetrisBlock.ValidateMove(this))
+			transform.position -= direction;
 	}
 }

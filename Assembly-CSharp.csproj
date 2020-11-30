@@ -68,10 +68,10 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\IInput.cs" />
     <Compile Include="Assets\Scripts\InputManager.cs" />
+    <Compile Include="Assets\Scripts\MainInstaller.cs" />
     <Compile Include="Assets\Scripts\Spawner.cs" />
     <Compile Include="Assets\Scripts\TetrisBlock.cs" />
     <Compile Include="Assets\Scripts\Tetromino.cs" />
-    <Compile Include="Assets\Scripts\TetrominoItem.cs" />
     <Compile Include="Assets\Scripts\TetrominoVariant.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>E:/Unity/Projects/Tetris/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>

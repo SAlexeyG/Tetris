@@ -1,55 +1,19 @@
 using System;
 using UnityEngine;
 
-public class TetrisBlock : MonoBehaviour
+public class TetrisBlock
 {
-	public IInput inputManager;
-	public static int height = 20;
-	public static int widht = 10;
+	private int height = 20;
+	private int width = 10;
 
-	private static Transform[,] grid = new Transform[widht, height];
+	private Spawner spawner; 
+	private Transform[,] grid;
 
-	private void Start()
+	public TetrisBlock(Spawner _spawner)
 	{
-		inputManager.OnLeft += () => Move(Vector3.left);
-		inputManager.OnRight += () => Move(Vector3.right);
-		inputManager.OnUp += Rotate;
-		inputManager.OnDown += Fall;
-	}
-
-	private void OnDisable()
-	{
-		inputManager.OnLeft -= () => Move(Vector3.left);
-		inputManager.OnRight -= () => Move(Vector3.right);
-		inputManager.OnUp -= Rotate;
-		inputManager.OnDown -= Fall;
-	}
-
-	private void Rotate()
-	{
-		transform.Rotate(Vector3.forward, -90f);
-		if (!ValidMove())
-			transform.Rotate(Vector3.forward, 90f);
-	}
-
-	private void Fall()
-	{
-		transform.position += Vector3.down;
-		if (!ValidMove())
-		{
-			transform.position += Vector3.up;
-			AddToGrid();
-			CheckForLines();
-			enabled = false;
-			FindObjectOfType<Spawner>().NewTetromino();
-		}
-	}
-
-	private void Move(Vector3 direction)
-	{
-		transform.position += direction;
-		if (!ValidMove())
-			transform.position -= direction;
+		spawner = _spawner;
+		grid = new Transform[width, height];
+		spawner.NewTetrominoForField(this);
 	}
 
 	private void CheckForLines()
@@ -68,7 +32,7 @@ public class TetrisBlock : MonoBehaviour
 	{
 		for (int i = lineIndex; i < height; i++)
 		{
-			for (int j = 0; j < widht; j++)
+			for (int j = 0; j < width; j++)
 			{
 				if (grid[j, i] != null)
 				{
@@ -82,16 +46,16 @@ public class TetrisBlock : MonoBehaviour
 
 	private void DeleteLine(int lineIndex)
 	{
-		for (int i = 0; i < widht; i++)
+		for (int i = 0; i < width; i++)
 		{
-			Destroy(grid[i, lineIndex].gameObject);
+			GameObject.Destroy(grid[i, lineIndex].gameObject);
 			grid[i, lineIndex] = null;
 		}
 	}
 
 	private bool HasLine(int lineIndex)
 	{
-		for (int i = 0; i < widht; i++)
+		for (int i = 0; i < width; i++)
 		{
 			if (grid[i, lineIndex] == null)
 			{
@@ -102,9 +66,9 @@ public class TetrisBlock : MonoBehaviour
 		return true;
 	}
 
-	private void AddToGrid()
+	private void AddToGrid(Tetromino tetromino)
 	{
-		foreach (Transform children in transform)
+		foreach (Transform children in tetromino.Transform)
 		{
 			int roundedX = Mathf.RoundToInt(children.transform.position.x);
 			int roundedY = Mathf.RoundToInt(children.transform.position.y);
@@ -113,24 +77,28 @@ public class TetrisBlock : MonoBehaviour
 		}
 	}
 
-	private bool ValidMove()
+	public bool ValidateMove(Tetromino tetromino)
 	{
-		foreach (Transform children in transform)
+		foreach (Transform children in tetromino.Transform)
 		{
 			int roundedX = Mathf.RoundToInt(children.transform.position.x);
 			int roundedY = Mathf.RoundToInt(children.transform.position.y);
 
-			if (roundedX < 0 || roundedX >= widht || roundedY < 0 || roundedY >= height)
-			{
+			if (roundedX < 0 || roundedX >= width || roundedY < 0 || roundedY >= height)
 				return false;
-			}
 
 			if (grid[roundedX, roundedY] != null)
-			{
 				return false;
-			}
 		}
 
 		return true;
+	}
+
+	public void DestructTetromino(Tetromino tetromino)
+	{
+		AddToGrid(tetromino);
+		spawner.DeleteTetromino(tetromino);
+		CheckForLines();
+		spawner.NewTetrominoForField(this);
 	}
 }

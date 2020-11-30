@@ -1,22 +1,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
-public class Spawner : MonoBehaviour
+public class Spawner
 {
-	public InputManager inputManager;
-	public GameObject[] Tetrominos;
+	private Vector3 spawnPoint;
+	private GameObject[] tetrominoVariants;
+	private IInput inputManager;
+	private List<Tetromino> tetrominos = new List<Tetromino>();
 
-	private void Start()
+	public Spawner(Vector3 _spawnPoint, GameObject[] _tetrominoVariants, IInput _inputManager)
 	{
-		NewTetromino();
+		spawnPoint = _spawnPoint;
+		tetrominoVariants = _tetrominoVariants;
+		inputManager = _inputManager;
 	}
 
-	public void NewTetromino()
+	public void NewTetrominoForField(TetrisBlock tetrisBlock)
 	{
-		var obj = Instantiate(Tetrominos[Random.Range(0, Tetrominos.Length)],
-					transform.position,
+		var obj = GameObject.Instantiate(tetrominoVariants[Random.Range(0, tetrominoVariants.Length)],
+					spawnPoint,
 					Quaternion.identity);
-		obj.GetComponent<TetrisBlock>().inputManager = inputManager;
+		tetrominos.Add(new Tetromino(obj.transform, inputManager, tetrisBlock));
+	}
+
+	public void DeleteTetromino(Tetromino tetromino)
+	{
+		tetrominos.Remove(tetromino);
 	}
 }
