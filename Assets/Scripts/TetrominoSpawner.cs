@@ -9,6 +9,7 @@ public class TetrominoSpawner : ITetrominoSpawner
 	private GameObject[] tetrominoVariants;
 	private IInput inputManager;
 	private List<Tetromino> tetrominos = new List<Tetromino>();
+	private List<GameObject> tetrominoObjects = new List<GameObject>();
 
 	public TetrominoSpawner(Vector3 _spawnPoint, GameObject[] _tetrominoVariants, IInput _inputManager)
 	{
@@ -20,9 +21,11 @@ public class TetrominoSpawner : ITetrominoSpawner
 	public GameObject Create()
 	{
 		var randomTerominoVariant = tetrominoVariants[Random.Range(0, tetrominoVariants.Length)];
-		return GameObject.Instantiate(randomTerominoVariant,
+		var obj = GameObject.Instantiate(randomTerominoVariant,
 					spawnPoint,
 					Quaternion.identity);
+		tetrominoObjects.Add(obj);
+		return obj;
 	}
 
 	public void CreateTetrominoForField(IField field)
@@ -40,5 +43,12 @@ public class TetrominoSpawner : ITetrominoSpawner
 	{
 		tetromino.IsMoving = false;
 		tetrominos.Remove(tetromino);
+
+		var objectsToRemove = tetrominoObjects.Where(o => o.transform.childCount == 0);
+
+		foreach (var obj in objectsToRemove)
+			Delete(obj);
+
+		tetrominoObjects.RemoveAll(o => o.transform.childCount == 0);
 	}
 }

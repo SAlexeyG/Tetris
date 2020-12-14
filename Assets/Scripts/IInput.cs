@@ -6,4 +6,6 @@ public interface IInput
 	event Action OnRight;
 	event Action OnUp;
 	event Action OnDown;
+
+	bool IsEnabled { get; set; }
 }

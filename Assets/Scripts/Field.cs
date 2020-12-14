@@ -12,12 +12,17 @@ public class Field : IField
 {
 	private FieldSize fieldSize;
 	private ITetrominoSpawner spawner;
+	Vector3 spawnPoint;
 	private Transform[,] grid;
 
-	public Field(ITetrominoSpawner _spawner, FieldSize _fieldSize)
+	public event Action OnOverflow;
+	public event Action OnLineDeleted;
+
+	public Field(ITetrominoSpawner _spawner, FieldSize _fieldSize, Vector3 _spawnPoint)
 	{
 		spawner = _spawner;
 		fieldSize = _fieldSize;
+		spawnPoint = _spawnPoint;
 		grid = new Transform[fieldSize.width, fieldSize.height];
 		spawner.CreateTetrominoForField(this);
 	}
@@ -34,6 +39,14 @@ public class Field : IField
 
 		spawner.DisableTetromino(tetromino);
 		CheckForLines();
+
+		if(grid[Mathf.RoundToInt(spawnPoint.x), 
+			Mathf.RoundToInt(spawnPoint.y)] != null)
+		{
+			OnOverflow?.Invoke();
+			return;
+		}
+
 		spawner.CreateTetrominoForField(this);
 	}
 
@@ -89,6 +102,7 @@ public class Field : IField
 			spawner.Delete(grid[i, lineIndex].gameObject);
 			grid[i, lineIndex] = null;
 		}
+		OnLineDeleted?.Invoke();
 	}
 
 	private bool HasLine(int lineIndex)
