@@ -2,29 +2,40 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
-public class InputManager : MonoBehaviour, IInput
+public class InputManager : ITickable, IInput
 {
-	[SerializeField] private float fallTime = default;
+	private float fallTime;
+	public bool IsEnabled { get; set; }
 
-	[HideInInspector] public event Action OnLeft;
-	[HideInInspector] public event Action OnRight;
-	[HideInInspector] public event Action OnUp;
-	[HideInInspector] public event Action OnDown;
+	public InputManager(float _fallTime)
+	{
+		IsEnabled = true;
+		fallTime = _fallTime;
+	}
+
+	public event Action OnLeft;
+	public event Action OnRight;
+	public event Action OnUp;
+	public event Action OnDown;
 
 	private float previousTime;
 
-	private void Update()
+	public void Tick()
 	{
-		if (Input.GetKeyDown(KeyCode.LeftArrow)) OnLeft?.Invoke();
-		if (Input.GetKeyDown(KeyCode.RightArrow)) OnRight?.Invoke();
-		if (Input.GetKeyDown(KeyCode.UpArrow)) OnUp?.Invoke();
-
-		if (Time.time - previousTime >
-			(Input.GetKey(KeyCode.DownArrow) ? fallTime / 10 : fallTime))
+		if (IsEnabled)
 		{
-			OnDown?.Invoke();
-			previousTime = Time.time;
+			if (Input.GetKeyDown(KeyCode.LeftArrow)) OnLeft?.Invoke();
+			if (Input.GetKeyDown(KeyCode.RightArrow)) OnRight?.Invoke();
+			if (Input.GetKeyDown(KeyCode.UpArrow)) OnUp?.Invoke();
+
+			if (Time.time - previousTime >
+				(Input.GetKey(KeyCode.DownArrow) ? fallTime / 10 : fallTime))
+			{
+				OnDown?.Invoke();
+				previousTime = Time.time;
+			}
 		}
 	}
 }
