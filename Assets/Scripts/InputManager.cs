@@ -35,6 +35,7 @@ public class InputManager : ITickable, IInput
 			{
 				OnDown?.Invoke();
 				previousTime = Time.time;
+				fallTime *= 0.99f;
 			}
 		}
 	}
